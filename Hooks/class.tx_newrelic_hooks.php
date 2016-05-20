@@ -1,5 +1,7 @@
 <?php
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 class tx_newrelic_hooks {
 
     /**
@@ -9,7 +11,7 @@ class tx_newrelic_hooks {
      */
     public function frontendPreprocessRequest() {
         /** @var \AOE\Newrelic\Service $service */
-        $service = t3lib_div::makeInstance('\AOE\Newrelic\Service');
+        $service = GeneralUtility::makeInstance('\AOE\Newrelic\Service');
         $service->setConfiguredAppName();
         $service->setTransactionNameDefault('Frontend-Pre');
     }
@@ -22,9 +24,9 @@ class tx_newrelic_hooks {
      */
     public function frontendEndOfFrontend() {
         /** @var \AOE\Newrelic\Service $service */
-        $service = t3lib_div::makeInstance('\AOE\Newrelic\Service');
+        $service = GeneralUtility::makeInstance('\AOE\Newrelic\Service');
 
-        if ($temp_extId = t3lib_div::_GP('eID'))        {
+        if ($temp_extId = GeneralUtility::_GP('eID'))        {
             $service->setTransactionNameImmutable('eId_'.$temp_extId);
         }
         $service->setTransactionName('Frontend');

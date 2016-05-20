@@ -1,15 +1,18 @@
 <?php
-
 namespace AOE\Newrelic;
+
+use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 
 /**
  * Class Service
  * Usage:
- *  $service = t3lib_div::makeInstance('\AOE\Newrelic\Service');
+ *  $service = TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('\AOE\Newrelic\Service');
  *  $service->setTransactionName('Product Single View');
  * @package AOE\Newrelic
  */
-class Service implements \t3lib_Singleton {
+class Service implements SingletonInterface {
 
     /**
      * @var array
@@ -89,36 +92,35 @@ class Service implements \t3lib_Singleton {
         if (!isset($GLOBALS['TSFE'])) {
             return;
         }
+
+        /* @var $tsfe \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController */
         $tsfe = $GLOBALS['TSFE'];
         if ($tsfe->no_cache) {
             $this->setCustomParameter("TYPO3-NOCACHE", 1);
         }
-        if ($tsfe->isINTincScript) {
+        if ($tsfe->isINTincScript()) {
             $this->setCustomParameter("TYPO3-INTincScript", 1);
         }
-        if ($tsfe->isClientCacheable) {
+        if ($tsfe->isClientCachable) {
             $this->setCustomParameter("TYPO3-ClientCacheable", 1);
         }
         if (isset($tsfe->pageCacheTags) && is_array($tsfe->pageCacheTags)) {
             $this->setCustomParameter('X-CacheTags',implode('|', $tsfe->pageCacheTags).'|');
         }
-        // @var tslib_feUserAuth
-        $frontEndUser = $GLOBALS['TSFE']->fe_user;
-        if ($this->isFrontendUserActive($frontEndUser)) {
+
+        if ($this->isFrontendUserActive($tsfe->fe_user)) {
             $this->setCustomParameter('FrontendUser','yes');
-        }
-        else {
+        } else {
             $this->setCustomParameter('FrontendUser','no');
         }
-
     }
 
     /**
-     * @param tslib_feUserAuth $frontendUser
+     * @param FrontendUserAuthentication|string|null $frontendUser
      * @return bool
      */
     protected function isFrontendUserActive($frontendUser) {
-        if (!$frontendUser instanceof tslib_feUserAuth) {
+        if (!$frontendUser instanceof FrontendUserAuthentication) {
             return false;
         }
         if (isset($frontendUser->user['uid']) && $frontendUser->user['uid']) {
@@ -131,11 +133,11 @@ class Service implements \t3lib_Singleton {
      * adds some env variables
      */
     public function addCommonRequestParameters() {
-        $this->setCustomParameter("REQUEST_URI", \t3lib_div::getIndpEnv('REQUEST_URI'));
-        $this->setCustomParameter("REMOTE_ADDR", \t3lib_div::getIndpEnv('REMOTE_ADDR'));
-        $this->setCustomParameter("HTTP_USER_AGENT", \t3lib_div::getIndpEnv('HTTP_USER_AGENT'));
-        $this->setCustomParameter("SCRIPT_FILENAME", \t3lib_div::getIndpEnv('SCRIPT_FILENAME'));
-        $this->setCustomParameter("TYPO3_SSL", \t3lib_div::getIndpEnv('TYPO3_SSL'));
+        $this->setCustomParameter("REQUEST_URI", GeneralUtility::getIndpEnv('REQUEST_URI'));
+        $this->setCustomParameter("REMOTE_ADDR", GeneralUtility::getIndpEnv('REMOTE_ADDR'));
+        $this->setCustomParameter("HTTP_USER_AGENT", GeneralUtility::getIndpEnv('HTTP_USER_AGENT'));
+        $this->setCustomParameter("SCRIPT_FILENAME", GeneralUtility::getIndpEnv('SCRIPT_FILENAME'));
+        $this->setCustomParameter("TYPO3_SSL", GeneralUtility::getIndpEnv('TYPO3_SSL'));
     }
 
     /**

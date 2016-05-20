@@ -1,7 +1,7 @@
 <?php
-
 namespace AOE\Newrelic;
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * simple Processor that replaces some simple markers
@@ -13,7 +13,7 @@ class ExtraCacheContentProcessor implements \Tx_Extracache_System_ContentProcess
      */
     public function processContent($content) {
         /** @var \AOE\Newrelic\Service $service */
-        $service = \t3lib_div::makeInstance('\AOE\Newrelic\Service');
+        $service = GeneralUtility::makeInstance('\AOE\Newrelic\Service');
         if (isset($GLOBALS['NEWRELIC_STATICCACHECONTEXT']) && $GLOBALS['NEWRELIC_STATICCACHECONTEXT'] === TRUE) {
             $service->setTransactionName('Frontend-StaticCache');
             $service->addMemoryUsageCustomMetric('Extracache');
@@ -24,7 +24,7 @@ class ExtraCacheContentProcessor implements \Tx_Extracache_System_ContentProcess
 
     /**
      * handle exception
-     * @param Exception $e
+     * @param \Exception $e
      */
     public function handleException(\Exception $e) {
     }
